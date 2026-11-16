@@ -233,5 +233,3 @@ The only witness was the tool we were still installing. That story is part 2.
 - NXLog Community Edition reference: [im_msvistalog](https://docs.nxlog.co/ce/current/index.html#im_msvistalog), [om_tcp](https://docs.nxlog.co/ce/current/index.html#om_tcp), [xm_gelf](https://docs.nxlog.co/ce/current/index.html#xm_gelf), [pm_buffer](https://docs.nxlog.co/ce/current/index.html#pm_buffer)
 - Microsoft Sysinternals: [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - HardenAD: [LoicVeirman/HardenAD](https://github.com/LoicVeirman/HardenAD), open-source Active Directory hardening toolkit
-
-*Found a mistake, or seen the same behaviour? Open an issue here or reply on the Tech Community thread.*
