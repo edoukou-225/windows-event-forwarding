@@ -204,7 +204,7 @@ The link between collector and SIEM carries account names, command lines and Pow
 
 1. Add the computer account to the tier's source group.
 2. On the collector, rerun the firewall command so the new address is allowed.
-3. If the source is a DC, check that its copy of the Default Domain Controllers Policy matches the PDC's before you reboot it. Part 2 explains why.
+3. If the source is a DC, check that its copy of the Default Domain Controllers Policy matches the PDC's before you reboot it. [Part 2](dc-stopped-applying-security-policy.md) explains why.
 4. Reboot the source twice.
 5. Check `channelAccess` on the Security channel.
 6. If the source is a DC, install Sysmon and check the descriptor of its channel as well.
@@ -223,7 +223,7 @@ The link between collector and SIEM carries account names, command lines and Pow
 
 While we were adding another DC to the pilot, one forwarding event kept coming back every five minutes. Nothing else looked wrong. Following it led us to a domain controller that had quietly stopped applying its security settings after a reboot, because one file carried a timestamp 11 seconds away from the PDC's copy. The file had been written five months earlier.
 
-The only witness was the tool we were still installing. That story is part 2.
+The only witness was the tool we were still installing. That story is part 2: [The DC that stopped applying its security policy](dc-stopped-applying-security-policy.md).
 
 ## References
 
@@ -233,3 +233,5 @@ The only witness was the tool we were still installing. That story is part 2.
 - NXLog Community Edition reference: [im_msvistalog](https://docs.nxlog.co/ce/current/index.html#im_msvistalog), [om_tcp](https://docs.nxlog.co/ce/current/index.html#om_tcp), [xm_gelf](https://docs.nxlog.co/ce/current/index.html#xm_gelf), [pm_buffer](https://docs.nxlog.co/ce/current/index.html#pm_buffer)
 - Microsoft Sysinternals: [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - HardenAD: [LoicVeirman/HardenAD](https://github.com/LoicVeirman/HardenAD), open-source Active Directory hardening toolkit
+
+*Found a mistake, or seen the same behaviour? Open an issue here or reply on the Tech Community thread.*
