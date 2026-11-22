@@ -168,6 +168,8 @@ That also tells you where a loss would come from: a source log that wraps before
 wevtutil.exe sl "Microsoft-Windows-GroupPolicy/Operational" /ms:67108864
 ```
 
+A marker proves the path once. To keep proving it, alert on the age of the last event per DC and per channel, not on subscription state or heartbeats. In Graylog that means a condition that fires when a given source has sent nothing on a given channel for longer than its normal quiet period: a DC's Security channel is never quiet for long, while PowerShell or Sysmon can be. One catch: a grouped aggregation ("count by source") cannot fire for a source that sent nothing, because that source simply does not appear in the results. Either define one condition per expected source, or compare against the list of sources you expect. (Suggested by a reader in the Tech Community discussion.)
+
 What we have not tested yet: an outage of the SIEM input itself. NXLog buffers to disk in that case (`pm_buffer`), and `ForwardedEvents` holds the rest, but we have not measured it.
 
 ## On the Graylog side
