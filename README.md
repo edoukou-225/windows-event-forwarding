@@ -53,7 +53,14 @@ That SID is the service SID of WinRM and is the same on every Windows machine.
 
 Microsoft's own setup page tells you to add NETWORK SERVICE to *Event Log Readers*. On a member server that is a local group. On a domain controller it is a domain group: you would be granting read access to every log on every DC. On DCs, we did not follow that advice.
 
-**The part that cost us an afternoon.** In our lab the source needed two reboots. After one reboot everything looked configured and nothing flowed. Our reading, which we have not proven: the policy is applied after the Event Log service has started, so the first reboot writes the new right and the second one makes the service use it. Setting the descriptor directly with `wevtutil sl` takes effect at once, which is how we handled the Sysmon channel.
+**The part that cost us an afternoon.** In our lab every new DC source needed two reboots: after the first one, the GPO showed as applied and nothing flowed. We later isolated why, on a Windows Server 2022 DC:
+
+1. **The first reboot is only there for group membership.** The channel-access GPO is filtered on the source group, and a computer only sees a new group membership once its Kerberos ticket is refreshed, which normally happens at boot. Purging the machine's tickets does the same job without a reboot: `klist -li 0x3e7 purge`, then `gpupdate /target:computer /force`.
+2. **The second reboot is for the Event Log service.** Right after that `gpupdate`, the policy value was present (`HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security`, `ChannelAccess`), but `wevtutil gl Security` still showed the old descriptor. After one reboot, the WinRM SID was in the effective descriptor and a marker reached the collector.
+3. **It works the same way in reverse.** Taking the DC out of the GPO's scope removed the policy value at once, but the right stayed in the effective descriptor until the next boot.
+4. **Restarting only the service is not an option.** On our 2022 DC, `Restart-Service EventLog` failed because a dependent service (`netprofm`) refused to stop.
+
+So: add the source to the group, purge its machine tickets, `gpupdate`, then one reboot. Setting the descriptor directly with `wevtutil sl` takes effect at once, which is how we handled the Sysmon channel. (Thanks to a reader on Tech Community for pushing us to test this instead of assuming it.)
 
 **Proof.** Only the effective descriptor counts, not the GPO report:
 
@@ -207,7 +214,7 @@ The link between collector and SIEM carries account names, command lines and Pow
 1. Add the computer account to the tier's source group.
 2. On the collector, rerun the firewall command so the new address is allowed.
 3. If the source is a DC, check that its copy of the Default Domain Controllers Policy matches the PDC's before you reboot it. [Part 2](dc-stopped-applying-security-policy.md) explains why.
-4. Reboot the source twice.
+4. Purge the source's machine tickets (`klist -li 0x3e7 purge`), run `gpupdate /target:computer /force`, then reboot it once.
 5. Check `channelAccess` on the Security channel.
 6. If the source is a DC, install Sysmon and check the descriptor of its channel as well.
 7. Enlarge the local logs you rely on.
